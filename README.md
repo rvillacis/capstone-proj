@@ -1,4 +1,5 @@
-# Capstone project with the CME Group: Dynamic ML Models for FX Portfolio Risk Management
+# Capstone project with the CME Group
+# Dynamic ML Models for FX Portfolio Risk Management
 ## Andrew Villacis, Chloe Huang, Jiyuan Shi, Sahil Sachdev
 
 As our capstone project for the M.S. in Analytics at the University of Chicago, our goal for this repository is to test and implement the use of 
