@@ -7,8 +7,11 @@ class Currency_data():
         self.filename = 'FX_Test_USD-per-FX_Chicago.csv'
         self.fin_data = pd.read_csv(self.filename,index_col='DATE',parse_dates=True)
 
-    def batch(self,start=None,end=None,days=0,months=0,years=0,currencies=None):
+class Batch(Currency_data):    
+    
+    def __init__(self,start=None,end=None,days=0,months=0,years=0,currencies=None):
 
+        super().__init__()
         import numpy as np
 
         self.start = start
@@ -81,14 +84,69 @@ class Currency_data():
         self.pct_change = self.fin_data.pct_change()
         self.log_ret = np.log1p(self.pct_change)
 
-        return self.fin_data
+class Random_batch(Currency_data):
 
-#random _times
+    def __init__(self,start=None,spec_days=None,min_days=1,max_days=None,currencies=None,spec_curr=None,min_currencies=1,max_currencies=None):
+
+        super().__init__()
+        import random
+        import numpy as np
+
+        self.start = start
+        self.spec_days = spec_days
+        self.min_days = min_days
+        self.max_days = max_days
+        self.currencies = currencies
+        self.spec_curr = spec_curr
+        self.min_currencies = min_currencies
+        self.max_currencies = max_currencies
+
+        if self.start != None:
+            self.fin_data = self.fin_data[self.start:]
+            if self.spec_days != None:
+                self.fin_data = self.fin_data[:self.spec_days]
+            else:
+                max_num = self.max_days or len(self.fin_data)
+                rand_num = random.randint(self.min_days,max_num)
+                self.fin_data = self.fin_data[:rand_num]
+        
+        else:
+            rand_start = random.randint(1,len(self.fin_data)-self.min_days)
+            self.fin_data = self.fin_data[rand_start:]
+            max_num = self.max_days or (len(self.fin_data)-self.min_days)
+            self.fin_data = self.fin_data[:random.randint(self.min_days,max_num)]
+
+        if self.currencies != None:
+            if (type(self.currencies) == str) or (type(self.currencies) == list):
+                self.fin_data = self.fin_data[self.currencies]
+            else:
+                raise Exception('Please enter a string/list for the currencies you want to analyze or leave empty.')
+
+        elif self.spec_curr != None:
+            rand_curr = random.sample(list(self.fin_data.columns),self.spec_curr)
+            self.fin_data = self.fin_data[rand_curr]
+
+        else:
+            max_curr = self.max_currencies or len(self.fin_data.columns)
+            num_curr = random.randint(self.min_currencies,max_curr)
+            rand_curr = random.sample(list(self.fin_data.columns),num_curr)
+            self.fin_data = self.fin_data[rand_curr]
+
+        try:
+            self.fin_data = self.fin_data.to_frame()
+        except:
+            pass
+
+        self.num_rows = len(self.fin_data)
+        self.num_cols = len(self.fin_data.columns)
+        self.px_change = self.fin_data - self.fin_data.shift(1)
+        self.pct_change = self.fin_data.pct_change()
+        self.log_ret = np.log1p(self.pct_change)
+
 # and then let's do indicators
-#Should currency just be the base class and batch another object that inherits from it
-
 
 if __name__ == '__main__':
-    hola = Currency_data()
-    data = hola.batch(end='1997-01-01',days=30,currencies=['USDEUR','USDGBP'])
-    print(hola.log_ret)
+    # batch = Batch(end='1997-01-01',days=30,currencies=['USDEUR','USDGBP'])
+    randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=20,max_currencies=3,min_currencies=1)
+    print(randombatch.log_ret)
+    
