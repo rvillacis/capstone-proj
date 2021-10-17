@@ -84,13 +84,32 @@ class Batch(Currency_data):
         self.pct_change = self.fin_data.pct_change()
         self.log_ret = np.log1p(self.pct_change)
 
+    def stats(self):
+        
+        import numpy as np
+        import pandas as pd
+        self.stats_df = pd.DataFrame(columns=['Minimum','Maximum','Average','Median','StDev'])
+
+        for column in self.fin_data.columns:
+            data = self.fin_data[column]
+            minimum = min(self.fin_data[column])
+            maximum = max(self.fin_data[column])
+            average = np.mean(self.fin_data[column])
+            median = np.median(self.fin_data[column])
+            stdev = np.std(self.fin_data[column])
+            self.stats_df.loc[column] = [minimum,maximum,average,median,stdev]
+
+        return self.stats_df
+
 class Random_batch(Currency_data):
 
-    def __init__(self,start=None,spec_days=None,min_days=1,max_days=None,currencies=None,spec_curr=None,min_currencies=1,max_currencies=None):
+    def __init__(self,start=None,spec_days=None,min_days=1,max_days=None,currencies=None,spec_curr=None,min_currencies=1,max_currencies=None,seed=None):
 
         super().__init__()
         import random
         import numpy as np
+
+        random.seed(None)
 
         self.start = start
         self.spec_days = spec_days
@@ -143,10 +162,25 @@ class Random_batch(Currency_data):
         self.pct_change = self.fin_data.pct_change()
         self.log_ret = np.log1p(self.pct_change)
 
-# and then let's do indicators
+    def stats(self):
+        
+        import numpy as np
+        import pandas as pd
+        self.stats_df = pd.DataFrame(columns=['Minimum','Maximum','Average','Median','StDev'])
+
+        for column in self.fin_data.columns:
+            data = self.fin_data[column]
+            minimum = min(self.fin_data[column])
+            maximum = max(self.fin_data[column])
+            average = np.mean(self.fin_data[column])
+            median = np.median(self.fin_data[column])
+            stdev = np.std(self.fin_data[column])
+            self.stats_df.loc[column] = [minimum,maximum,average,median,stdev]
+
+        return self.stats_df
 
 if __name__ == '__main__':
-    # batch = Batch(end='1997-01-01',days=30,currencies=['USDEUR','USDGBP'])
-    randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=20,max_currencies=3,min_currencies=1)
-    print(randombatch.log_ret)
+    batch = Batch(start='1997-01-01',days=30,currencies=['USDEUR','USDGBP'])
+    randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
+    print(randombatch.stats())
     

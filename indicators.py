@@ -1,0 +1,1 @@
+# Add indicators separately and then also all of them to a dataframe at once, or selecting which ones you want

@@ -1,0 +1,7 @@
+- Tableau database idea
+
+- Anomaly detection on top of the data and model
+
+- Maybe use ensemble models if the underlying models are uncorrelated
+
+- Maybe do supervised learning showing the results of different dates and the result of the next
