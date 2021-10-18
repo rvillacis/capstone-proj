@@ -1,8 +1,9 @@
+import numpy as np
+import pandas as pd
+
 class Currency_data():
     
     def __init__(self):
-
-        import pandas as pd
 
         self.filename = 'FX_Test_USD-per-FX_Chicago.csv'
         self.fin_data = pd.read_csv(self.filename,index_col='DATE',parse_dates=True)
@@ -12,7 +13,6 @@ class Batch(Currency_data):
     def __init__(self,start=None,end=None,days=0,months=0,years=0,currencies=None):
 
         super().__init__()
-        import numpy as np
 
         self.start = start
         self.end = end
@@ -86,8 +86,6 @@ class Batch(Currency_data):
 
     def stats(self):
         
-        import numpy as np
-        import pandas as pd
         self.stats_df = pd.DataFrame(columns=['Minimum','Maximum','Average','Median','StDev'])
 
         for column in self.fin_data.columns:
@@ -107,8 +105,6 @@ class Random_batch(Currency_data):
 
         super().__init__()
         import random
-        import numpy as np
-
         random.seed(None)
 
         self.start = start
@@ -164,8 +160,6 @@ class Random_batch(Currency_data):
 
     def stats(self):
         
-        import numpy as np
-        import pandas as pd
         self.stats_df = pd.DataFrame(columns=['Minimum','Maximum','Average','Median','StDev'])
 
         for column in self.fin_data.columns:
@@ -182,5 +176,5 @@ class Random_batch(Currency_data):
 if __name__ == '__main__':
     batch = Batch(start='1997-01-01',days=30,currencies=['USDEUR','USDGBP'])
     randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
-    print(randombatch.stats())
+    print(batch.fin_data)
     
