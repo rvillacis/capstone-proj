@@ -2,7 +2,6 @@
 import numpy as np
 import pandas as pd
 from extraction import Batch, Random_batch
-from tti.indicators import StandardDeviation, RelativeVolatilityIndex
 
 def prepare_data(px_data):
 
@@ -159,19 +158,41 @@ def StochasticO(px_data,k_periods=14, k_slowing_periods=1,d_periods=3, d_method=
     
     return col_dict
 
-def up_down(px_data):
-    pass
-    #Make also an indicator that shows if the day is up or down
-    #Do also a way that you can collect multiple indicators at once
+def RollingStDev(px_data,period=20,show_hl=False):
+    
+    from tti.indicators import StandardDeviation
 
+    col_dict = prepare_data(px_data)
+
+    for currency,data in col_dict.items():
+        indicator = StandardDeviation(input_data=data, period=period).getTiData()
+        data['StDev'] = indicator
+
+        if show_hl != True:
+            data.drop(['high','low'],axis=1,inplace=True)
+    
+    return col_dict
+
+def Up_Down(px_data,show_hl=False):
+
+    col_dict = prepare_data(px_data)
+
+    for currency,data in col_dict.items():
+        
+        data['Up_Down'] = data['close'].pct_change().apply(lambda x: 'Up' if x > 0 else 'Down' if x < 0 else 'None')
+
+        if show_hl != True:
+            data.drop(['high','low'],axis=1,inplace=True)
+    
+    return col_dict
 
 if __name__ == '__main__':
-    # batch = Batch(start='1999-01-01',days=30, currencies=['USDEUR','USDGBP'])
-    # indicator = StochasticO(batch.px_data)
-    # print(indicator['USDEUR'])
+    batch = Batch(start='1999-01-01',days=30, currencies=['USDEUR','USDGBP'])
+    indicator = MA(batch.px_data)
+    print(indicator['USDEUR'])
 
 
-    batch = Batch(start='1999-01-01',days=30, currencies='USDEUR').px_data
-    prepared = prepare_data(batch)['USDEUR']
-    indicator = StochasticOscillator(prepared)
-    print(indicator.getTiData())
+    # batch = Batch(start='1999-01-01',days=60, currencies='USDEUR').px_data
+    # prepared = prepare_data(batch)['USDEUR']
+    # indicator = RelativeVolatilityIndex(prepared)
+    # print(indicator.getTiData())

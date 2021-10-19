@@ -1,3 +1,5 @@
+#Maybe include easy graphs here
+
 import numpy as np
 import pandas as pd
 
