@@ -7,8 +7,12 @@ class Currency_data():
     
     def __init__(self):
 
+        import os
+
         self.filename = 'FX_Test_USD-per-FX_Chicago.csv'
-        self.px_data = pd.read_csv(self.filename,index_col='DATE',parse_dates=True)
+        self.filepath = os.path.abspath(self.filename)
+        self.px_data = pd.read_csv(self.filepath,index_col='DATE',parse_dates=True)
+
 
 class Batch(Currency_data):    
     
