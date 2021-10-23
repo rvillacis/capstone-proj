@@ -6,6 +6,8 @@
 
 - Maybe do supervised learning showing the results of different dates and the result of the next
 
+- Organize package into Models, Data, and Trading
+
 
 
 Random trees:

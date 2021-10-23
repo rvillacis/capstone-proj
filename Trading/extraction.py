@@ -7,12 +7,18 @@ class Currency_data():
     
     def __init__(self):
 
-        import os
+        import json
 
-        self.filename = 'FX_Test_USD-per-FX_Chicago.csv'
-        self.filepath = os.path.abspath(self.filename)
-        self.px_data = pd.read_csv(self.filepath,index_col='DATE',parse_dates=True)
+        settings_file = open('settings.json',)
+        data = json.load(settings_file)
 
+        if data['csv_file']['csv_file_location']:
+            self.px_data = pd.read_csv(data['csv_file']['csv_file_location'],index_col='DATE',parse_dates=True)
+        else:
+            try:
+                self.px_data = pd.read_csv('./Data/FX_Test_USD-per-FX_Chicago.csv',index_col='DATE',parse_dates=True)
+            except:
+                print('Update csv data file location in /Trading/settings.json')
 
 class Batch(Currency_data):    
     
@@ -181,6 +187,6 @@ class Random_batch(Currency_data):
 
 if __name__ == '__main__':
     batch = Batch(start='1997-01-01',days=30,currencies=['USDEUR','USDGBP'])
-    randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
+    # randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
     print(batch.px_data)
     
