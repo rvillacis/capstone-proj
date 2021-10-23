@@ -186,9 +186,30 @@ def Up_Down(px_data,show_hl=False):
     
     return col_dict
 
+def Lagged_Data(px_data,lag=None,lag_until=None):
+
+    col_dict = prepare_data(px_data)
+
+    for currency,data in col_dict.items():
+        
+        data.drop(['high','low'],axis=1,inplace=True)
+
+        if len(data.columns) > 1:
+            raise ValueError('Pass only one data column')
+
+        if lag != None:
+            assert lag > 0, 'Enter an integer bigger than zero'
+            data['lag_{}'.format(lag)] = data['close'].shift(lag)
+        elif lag_until != None:
+            assert lag_until > 0, 'Enter an integer bigger than zero'
+            for lags in range(lag_until):
+                data['lag_{}'.format(lags+1)] = data['close'].shift(lags+1)
+            
+    return col_dict
+
 if __name__ == '__main__':
     batch = Batch(start='1999-01-01',days=30, currencies=['USDEUR','USDGBP'])
-    indicator = MA(batch.px_data)
+    indicator = Lagged_Data(batch.px_data,lag_until=3)
     print(indicator['USDEUR'])
 
 

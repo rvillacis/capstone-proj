@@ -5,3 +5,30 @@
 - Maybe use ensemble models if the underlying models are uncorrelated
 
 - Maybe do supervised learning showing the results of different dates and the result of the next
+
+
+
+Random trees:
+
+remember to shift the results one day so that they can predict
+
+Use returns and then also price, try to use different indicators
+
+Use over/under or buy/sell rules for the indicators including MA(50)/MA(200) or RSI. Specially for random forests
+
+Remember that they predict probability of the class so you can see how likely it is to be that class and then you can adjust probability
+
+Remember to repeat and test with the same currency/time, different currencies, and different times  
+
+Limit splits in some way
+
+You always need to lag the return or result
+
+Lagged vs current prices and returns
+
+
+Accuracy Metrics:
+Precision - Accuracy
+MAE 
+RMSE
+Correct Up/Down and correct total 
