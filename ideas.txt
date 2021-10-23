@@ -6,7 +6,7 @@
 
 - Maybe do supervised learning showing the results of different dates and the result of the next
 
-- Organize package into Models, Data, and Trading
+- Take notebooks outside of the project and just import capstone_proj as cp
 
 
 

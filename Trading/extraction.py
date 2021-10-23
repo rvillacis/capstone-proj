@@ -5,26 +5,35 @@ import pandas as pd
 
 class Currency_data():
     
-    def __init__(self):
+    def __init__(self,filepath=None):
 
         import json
 
-        settings_file = open('settings.json',)
-        data = json.load(settings_file)
+        if filepath != None:
+            try:
+                self.px_data = pd.read_csv(filepath,index_col='DATE',parse_dates=True)
+            except:
+                pass
+        elif True:
+            try:
+                settings_file = open('Trading/settings.json')
+                data = json.load(settings_file)
 
-        if data['csv_file']['csv_file_location']:
-            self.px_data = pd.read_csv(data['csv_file']['csv_file_location'],index_col='DATE',parse_dates=True)
+                if data['csv_file']['csv_file_location']:
+                    self.px_data = pd.read_csv(data['csv_file']['csv_file_location'],index_col='DATE',parse_dates=True)
+            except:
+                pass
         else:
             try:
                 self.px_data = pd.read_csv('./Data/FX_Test_USD-per-FX_Chicago.csv',index_col='DATE',parse_dates=True)
             except:
-                print('Update csv data file location in /Trading/settings.json')
+                print('Update csv data file location in /Trading/settings.json or provide filepath')
 
 class Batch(Currency_data):    
     
-    def __init__(self,start=None,end=None,days=0,months=0,years=0,currencies=None):
+    def __init__(self,filepath=None,start=None,end=None,days=0,months=0,years=0,currencies=None):
 
-        super().__init__()
+        super().__init__(filepath)
 
         self.start = start
         self.end = end
@@ -36,47 +45,45 @@ class Batch(Currency_data):
         if (self.start == None) and (self.end == None):
                 raise ValueError('You need to provide a start date, end date, or both.')
 
-        if (self.end != None) and (self.start == None):
-            self.days,self.months,self.years = -self.days,-self.months,-self.years
-
         if (self.start != None) and (self.end != None):
             if self.end > self.start:
                 self.px_data= self.px_data[self.start:self.end]
             else:
                 raise Exception('The end date must be after the start date')
+        else:
+
+            if (self.start == None) and (self.end != None):
+                self.days,self.months,self.years = -self.days,-self.months,-self.years
             
-        if self.start != None:
             year, month, day = self.start.split('-')
-        else:
-            year, month, day = self.end.split('-')
-        year, month, day = int(year), int(month), int(day)
+            year, month, day = int(year), int(month), int(day)
 
-        if self.years != 0:
-            year = year + self.years
+            if self.years != 0:
+                year = year + self.years
 
-        if self.months != 0:
-            if (month + self.months) > 12:
-                month = 1 + ((month + self.months) % 12)
-                year = year + ((month + self.months) // 12)
-            elif (month + self.months) < 1:
-                month = 12 - ((month - self.months) % 12)
-                year = year - ((month - self.months + 1) // 12)
+            if self.months != 0:
+                if (month + self.months) > 12:
+                    month = 1 + ((month + self.months) % 12)
+                    year = year + ((month + self.months) // 12)
+                elif (month + self.months) < 1:
+                    month = 12 - ((month - self.months) % 12)
+                    year = year - ((month - self.months + 1) // 12)
+                else:
+                    month = month + self.months
+
+            if self.days != 0:
+                if self.start != None:
+                    cropped_data = self.px_data[self.start:]
+                    self.px_data = cropped_data[:self.days]
+                if self.end != None:
+                    cropped_data = self.px_data[:self.end]
+                    self.px_data = cropped_data[self.days:]
             else:
-                month = month + self.months
-
-        if self.days != 0:
-            if self.start != None:
-                cropped_data = self.px_data[self.start:]
-                self.px_data = cropped_data[:self.days]
-            if self.end != None:
-                cropped_data = self.px_data[:self.end]
-                self.px_data = cropped_data[self.days:]
-        else:
-            start_end_date = '{}-{}-{}'.format(year,month,day)
-            if self.start != None:
-                self.px_data= self.px_data[self.start:start_end_date]
-            if self.end != None:
-                self.px_data = self.px_data[start_end_date:self.end]
+                start_end_date = '{}-{}-{}'.format(year,month,day)
+                if self.start != None:
+                    self.px_data= self.px_data[self.start:start_end_date]
+                if self.end != None:
+                    self.px_data = self.px_data[start_end_date:self.end]
 
         if (type(self.currencies) == str) or (type(self.currencies) == list):
             self.px_data = self.px_data[self.currencies]
@@ -113,9 +120,9 @@ class Batch(Currency_data):
 
 class Random_batch(Currency_data):
 
-    def __init__(self,start=None,spec_days=None,min_days=1,max_days=None,currencies=None,spec_curr=None,min_currencies=1,max_currencies=None,seed=None):
+    def __init__(self,start=None,spec_days=None,min_days=1,max_days=None,currencies=None,spec_curr=None,min_currencies=1,max_currencies=None,seed=None,filepath=None):
 
-        super().__init__()
+        super().__init__(filepath)
         import random
         random.seed(None)
 
@@ -186,7 +193,7 @@ class Random_batch(Currency_data):
         return self.stats_df
 
 if __name__ == '__main__':
-    batch = Batch(start='1997-01-01',days=30,currencies=['USDEUR','USDGBP'])
-    # randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
+    batch = Batch(start='1999-01-01',end='2000-01-01',currencies=['USDEUR','USDGBP'])
+    # # randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
     print(batch.px_data)
     
