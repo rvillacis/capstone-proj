@@ -193,7 +193,11 @@ class Random_batch(Currency_data):
         return self.stats_df
 
 if __name__ == '__main__':
-    batch = Batch(start='1999-01-01',end='2000-01-01',currencies=['USDEUR','USDGBP'])
+    # batch = Batch(start='1999-01-01',end='2000-01-01',currencies=['USDEUR','USDGBP'])
     # # randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
-    print(batch.px_data)
+    # print(batch.px_data)
+
+    batch = Batch(start='2003-01-01',end='2012-01-01',currencies='USDEUR')
+    data = batch.px_data
+    print(data)
     

@@ -208,12 +208,15 @@ def Lagged_Data(px_data,lag=None,lag_until=None):
     return col_dict
 
 if __name__ == '__main__':
-    batch = Batch(start='1999-01-01',days=30, currencies=['USDEUR','USDGBP'])
-    indicator = Lagged_Data(batch.px_data,lag_until=3)
-    print(indicator['USDEUR'])
-
+    # batch = Batch(start='1999-01-01',days=30, currencies=['USDEUR','USDGBP'])
+    # indicator = Lagged_Data(batch.px_data,lag_until=3)
+    # print(indicator['USDEUR'])
 
     # batch = Batch(start='1999-01-01',days=60, currencies='USDEUR').px_data
     # prepared = prepare_data(batch)['USDEUR']
     # indicator = RelativeVolatilityIndex(prepared)
     # print(indicator.getTiData())
+
+    # batch = Batch(start='2003-01-01',end='2012-01-01',currencies='USDEUR')
+    # data = batch.px_data
+    # print(data)
