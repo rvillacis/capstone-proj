@@ -22,6 +22,12 @@
 
 - Put data in other files so that it can be reused
 
+- Do we need to increase or reduce bias. I feel that right now my random forests are underperforming. Also look at how it fits the training data to see if there is a lot of variance or not
+
+- Maybe test different currencies programmatically
+
+- Find ways to reduce bias
+
 Random trees:
 
 remember to shift the results one day so that they can predict
