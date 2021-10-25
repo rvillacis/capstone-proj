@@ -8,7 +8,19 @@
 
 - Take notebooks outside of the project and just import capstone_proj as cp
 
+- Change so that an ATR can be calculated once or by column
 
+- Change so that indicators don't show the close column
+
+- Eliminate None, maybe just look at 2 classes given that None happens so infrequently, also so we can use roc_auc_score and graph. Add roc_auc_score
+
+- Put experiment data in the top and make functions for decision tree and random forests
+
+- Look only at predictions where the selected class has more than 70%-80% probability
+
+- Only one experiment data at the top and then a function that makes the decision tree that you only pass a dataframe to
+
+- Put data in other files so that it can be reused
 
 Random trees:
 

@@ -30,7 +30,7 @@ def ATR(px_data,show_hl=False):
         data['ATR'] = indicator
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
     
     return col_dict
 
@@ -45,7 +45,7 @@ def Bollinger(px_data,period=20,std_number=2,show_hl=False):
         data = data.join(indicator)
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
         
         col_dict[currency] = data
     
@@ -62,6 +62,9 @@ def Fibonacci(px_data,show_hl=False):
         data = indicator.iloc[-1]
         col_dict[currency] = data
 
+        if show_hl != True:
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
+
     return col_dict
 
 def Momentum(px_data,period=12,show_hl=False):
@@ -75,7 +78,7 @@ def Momentum(px_data,period=12,show_hl=False):
         data['Momentum'] = indicator
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
     
     return col_dict
 
@@ -90,7 +93,7 @@ def MA(px_data,period=20,ma_type='simple',show_hl=False):
         data['{}d_MA'.format(period)] = indicator
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
     
     return col_dict
 
@@ -105,7 +108,7 @@ def MACD(px_data,show_hl=False):
         data = data.join(indicator)
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
         
         col_dict[currency] = data
     
@@ -122,7 +125,7 @@ def RSI(px_data,period=14,show_hl=False):
         data['RSI'] = indicator
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
     
     return col_dict
 
@@ -137,7 +140,7 @@ def RMI(px_data,period=14,momentum_period=4,show_hl=False):
         data['RMI'] = indicator
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
     
     return col_dict
 
@@ -152,7 +155,7 @@ def StochasticO(px_data,k_periods=14, k_slowing_periods=1,d_periods=3, d_method=
         data = data.join(indicator)
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
         
         col_dict[currency] = data
     
@@ -169,20 +172,23 @@ def RollingStDev(px_data,period=20,show_hl=False):
         data['StDev'] = indicator
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
     
     return col_dict
 
-def Up_Down(px_data,show_hl=False):
+def Up_Down(px_data,show_hl=False,data_type='price'):
 
     col_dict = prepare_data(px_data)
 
     for currency,data in col_dict.items():
         
-        data['Up_Down'] = data['close'].pct_change().apply(lambda x: 'Up' if x > 0 else 'Down' if x < 0 else 'None')
+        if data_type == 'price':
+            data['Up_Down'] = data['close'].pct_change().apply(lambda x: 'Up' if x >= 0 else 'Down')
+        elif data_type == 'return':
+            data['Up_Down'] = data['close'].apply(lambda x: 'Up' if x >= 0 else 'Down' )
 
         if show_hl != True:
-            data.drop(['high','low'],axis=1,inplace=True)
+            data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
     
     return col_dict
 
@@ -192,18 +198,20 @@ def Lagged_Data(px_data,lag=None,lag_until=None):
 
     for currency,data in col_dict.items():
         
-        data.drop(['high','low'],axis=1,inplace=True)
+        data.drop(['high','low'],axis=1,inplace=True,errors='ignore')
 
         if len(data.columns) > 1:
             raise ValueError('Pass only one data column')
 
         if lag != None:
-            assert lag > 0, 'Enter an integer bigger than zero'
             data['lag_{}'.format(lag)] = data['close'].shift(lag)
         elif lag_until != None:
-            assert lag_until > 0, 'Enter an integer bigger than zero'
-            for lags in range(lag_until):
-                data['lag_{}'.format(lags+1)] = data['close'].shift(lags+1)
+            if lag_until > 0:
+                for lags in range(1,lag_until+1):
+                    data['lag_{}'.format(lags)] = data['close'].shift(lags)
+            elif lag_until < 0:
+                for lags in range(1,abs(lag_until)+1):
+                    data['lag_{}'.format(-lags)] = data['close'].shift(-lags)
             
     return col_dict
 
@@ -216,7 +224,7 @@ if __name__ == '__main__':
     # prepared = prepare_data(batch)['USDEUR']
     # indicator = RelativeVolatilityIndex(prepared)
     # print(indicator.getTiData())
-
-    # batch = Batch(start='2003-01-01',end='2012-01-01',currencies='USDEUR')
-    # data = batch.px_data
-    # print(data)
+    experiment_data2 = Batch(start='2003-01-01',end='2014-12-31',currencies='USDEUR').log_ret
+    lag_ret_5d = Lagged_Data(experiment_data2,lag_until=5)['USDEUR']
+    print(lag_ret_5d)
+    
