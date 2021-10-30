@@ -1,15 +1,19 @@
-# Capstone project with the CME Group
 # Dynamic ML Models for FX Portfolio Risk Management
-## Andrew Villacis, Chloe Huang, Jiyuan Shi, Sahil Sachdev
 
-As our capstone project for the M.S. in Analytics at the University of Chicago, our goal for this repository is to test and implement the use of 
-different machine learning methods applied to a number of currency pairs for which we have daily data. We plan to create a suite of strategies
-that in conjunction with one another can build a portfolio that will hopefully exceed benchmarks in risk/return parameters.
+Capstone project for the M.S. in Analytics at the University of Chicago. The goal of this repository is to test and implement the use of different machine learning methods applied to a number of currency pairs for which we have daily data. We plan to create a suite of strategies that, in conjunction with one another, can build a portfolio that will hopefully exceed benchmarks in risk/return parameters. Every strategy will be backtested using multiple methods including random time series and portfolios. The success of this portfolio will be measured by risk adjusted returns.
 
-We will backtest every strategy we implement, as well as, the portfolio that will develop as a combination of multiple methods. Some of the
-backtesting strategies we intend to use include a randomized time series start and beginning with a random portfolio.
+## Usage
+```python
+import capstone_proj as cp
+```
 
-Finally, we will take particular care of staying within risk/return parameters provided. The success of this portfolio will be measured by the
-return we are able to accomplish per each unit of risk.
+### Data Extraction for Time Series Tests
+```python
+batch = Batch(start=,[end=],[days=],[months=],[years=],[currencies=],[filepath=])
+randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
+```
+Data extraction methods provide a dataframe with currency data for specified dates. 
+- A user can specify a start/end date, or just a start date and an arbitrary number of days/months/years for which data is requested.
+- Specific currencies can be specified, otherwise all currencies are returned. 
+- Data filepath is optional
 
-No short selling, no leverage, and no additional data will be allowed.
