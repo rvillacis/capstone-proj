@@ -19,11 +19,11 @@ def prepare_data(px_data):
 
     return all_columns_dict
 
-def ATR(px_data,show_hl=False):
+def ATR(batch,show_hl=False):
 
     from tti.indicators import AverageTrueRange
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = AverageTrueRange(input_data=data).getTiData()
@@ -34,11 +34,11 @@ def ATR(px_data,show_hl=False):
     
     return col_dict
 
-def Bollinger(px_data,period=20,std_number=2,show_hl=False):
+def Bollinger(batch,period=20,std_number=2,show_hl=False):
 
     from tti.indicators import BollingerBands
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = BollingerBands(input_data=data,period=period,std_number=std_number).getTiData()
@@ -51,11 +51,11 @@ def Bollinger(px_data,period=20,std_number=2,show_hl=False):
     
     return col_dict
 
-def Fibonacci(px_data,show_hl=False):
+def Fibonacci(batch,show_hl=False):
 
     from tti.indicators import FibonacciRetracement
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = FibonacciRetracement(input_data=data).getTiData()
@@ -67,11 +67,11 @@ def Fibonacci(px_data,show_hl=False):
 
     return col_dict
 
-def Momentum(px_data,period=12,show_hl=False):
+def Momentum(batch,period=12,show_hl=False):
 
     from tti.indicators import Momentum
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = Momentum(input_data=data,period=period).getTiData()
@@ -82,11 +82,11 @@ def Momentum(px_data,period=12,show_hl=False):
     
     return col_dict
 
-def MA(px_data,period=20,ma_type='simple',show_hl=False):
+def MA(batch,period=20,ma_type='simple',show_hl=False):
 
     from tti.indicators import MovingAverage
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = MovingAverage(input_data=data,period=period,ma_type=ma_type).getTiData()
@@ -97,11 +97,11 @@ def MA(px_data,period=20,ma_type='simple',show_hl=False):
     
     return col_dict
 
-def MACD(px_data,show_hl=False):
+def MACD(batch,show_hl=False):
 
     from tti.indicators import MovingAverageConvergenceDivergence
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = MovingAverageConvergenceDivergence(input_data=data).getTiData()
@@ -114,11 +114,11 @@ def MACD(px_data,show_hl=False):
     
     return col_dict
 
-def RSI(px_data,period=14,show_hl=False):
+def RSI(batch,period=14,show_hl=False):
 
     from tti.indicators import RelativeStrengthIndex
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = RelativeStrengthIndex(input_data=data,period=period).getTiData()
@@ -129,11 +129,11 @@ def RSI(px_data,period=14,show_hl=False):
     
     return col_dict
 
-def RMI(px_data,period=14,momentum_period=4,show_hl=False):
+def RMI(batch,period=14,momentum_period=4,show_hl=False):
 
     from tti.indicators import RelativeMomentumIndex
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = RelativeMomentumIndex(input_data=data,period=period,momentum_period=momentum_period).getTiData()
@@ -144,11 +144,11 @@ def RMI(px_data,period=14,momentum_period=4,show_hl=False):
     
     return col_dict
 
-def StochasticO(px_data,k_periods=14, k_slowing_periods=1,d_periods=3, d_method='simple',show_hl=False):
+def StochasticO(batch,k_periods=14, k_slowing_periods=1,d_periods=3, d_method='simple',show_hl=False):
 
     from tti.indicators import StochasticOscillator
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = StochasticOscillator(input_data=data,k_periods=k_periods, k_slowing_periods=k_slowing_periods,d_periods=d_periods, d_method=d_method).getTiData()
@@ -161,11 +161,11 @@ def StochasticO(px_data,k_periods=14, k_slowing_periods=1,d_periods=3, d_method=
     
     return col_dict
 
-def RollingStDev(px_data,period=20,show_hl=False):
+def RollingStDev(batch,period=20,show_hl=False):
     
     from tti.indicators import StandardDeviation
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(batch.px_data)
 
     for currency,data in col_dict.items():
         indicator = StandardDeviation(input_data=data, period=period).getTiData()
@@ -176,9 +176,9 @@ def RollingStDev(px_data,period=20,show_hl=False):
     
     return col_dict
 
-def Up_Down(px_data,show_hl=False,data_type='price'):
+def Up_Down(px_or_ret,show_hl=False,data_type='price'):
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(px_or_ret)
 
     for currency,data in col_dict.items():
         
@@ -192,9 +192,9 @@ def Up_Down(px_data,show_hl=False,data_type='price'):
     
     return col_dict
 
-def Lagged_Data(px_data,lag=None,lag_until=None):
+def Lagged_Data(px_or_ret,lag=None,lag_until=None):
 
-    col_dict = prepare_data(px_data)
+    col_dict = prepare_data(px_or_ret)
 
     for currency,data in col_dict.items():
         

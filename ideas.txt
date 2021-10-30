@@ -12,6 +12,8 @@
 
 - Find ways to reduce bias
 
+- Maybe have batches as classes where you simply append indicators. If a dictionary is passed or dataframe with multiple currencies is passed then add dictionary to all currencies or create a dictionary of multiple currencies. Output either a dataframe or dictionary
+
 Random trees:
 
 remember to shift the results one day so that they can predict
