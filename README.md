@@ -13,6 +13,8 @@ batch = Batch(start=,[end=],[days=],[months=],[years=],[currencies=],[filepath=]
 randombatch = Random_batch(start='1999-01-01',min_days=10,max_days=30,max_currencies=3,min_currencies=1)
 ```
 Data extraction methods provide a dataframe with currency data for specified dates. 
+
+* Batch provides data for specific dates/currencies
 - A user can specify a start/end date, or just a start date and an arbitrary number of days/months/years for which data is requested.
 - Specific currencies can be specified, otherwise all currencies are returned. 
 - Data filepath is optional
