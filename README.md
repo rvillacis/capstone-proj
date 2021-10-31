@@ -22,33 +22,38 @@ randombatch = cp.Random_batch(start=str,[spec_days=int],[min_days=int],[max_days
 # Methods
 .stats()
 ```
-- Batch provides data for specific dates/currencies. Specific start/end dates and currencies can be declared. Otherwise days/months/years can be used after a start date.
+- **Batch** provides data for specific dates/currencies. Specific start/end dates and currencies can be declared. Otherwise days/months/years can be used after a start date.
 
-- Random_batch provides random date/currency data within certain parameters. Specific dates/currencies can be specified. Otherwise use min/max days or currencies to get data from a random number of days or currencies within those intervals.
+- **Random_batch** provides random date/currency data within certain parameters. Specific dates/currencies can be specified. Otherwise use min/max days or currencies to get data from a random number of days or currencies within those intervals.
 
 ### Technical Indicators
 Indicators provide valuable information on a batch of currency data. 
+Input: Dataframe, Dictionary or Batch/Random_batch object
+Output: Dataframe/Dictionary of raw data plus indicator
 ```python
-atr = cp.ATR(batch,[show_hl=False])
+atr = cp.ATR(currency_data,[show_hl=False])
 bollinger_bands = cp.Bollinger(batch,[period=20],[std_number=2],[show_hl=False])
-fibonacci_retracement = cp.Fibonacci(batch,[show_hl=False])
-momentum = cp.Momentum(batch,[period=12],[show_hl=False])
-moving_average = cp.MA(batch,[period=20],[ma_type='simple'],[show_hl=False])
-converge_divergence = cp.MACD(batch,[show_hl=False])
-relative_strength = cp.RSI(batch,[period=14],[show_hl=False])
-relative_momentum = cp.RMI(batch,[period=14],[momentum_period=4],[show_hl=False])
-stochastic_oscillator = cp.StochasticO(batch,[k_periods=14], [k_slowing_periods=1],\
+fibonacci_retracement = cp.Fibonacci(currency_data,[show_hl=False])
+momentum = cp.Momentum(currency_data,[period=12],[show_hl=False])
+moving_average = cp.MA(currency_data,[period=20],[ma_type='simple'],[show_hl=False])
+converge_divergence = cp.MACD(currency_data,[show_hl=False])
+relative_strength = cp.RSI(currency_data,[period=14],[show_hl=False])
+relative_momentum = cp.RMI(currency_data,[period=14],[momentum_period=4],[show_hl=False])
+stochastic_oscillator = cp.StochasticO(currency_data,[k_periods=14], [k_slowing_periods=1],\
                         [d_periods=3],[d_method='simple'],[show_hl=False])
-rolling_st_dev = cp.RollingStDev(batch,[period=20],[show_hl=False])
-up_down = cp.Up_Down(px_or_ret,[show_hl=False],[data_type='price'])
-lagged_data = cp.Lagged_Data(px_or_ret,[lag=None],[lag_until=None])
+rolling_st_dev = cp.RollingStDev(currency_data,[period=20],[show_hl=False])
 
-# For px_or_ret you must pass specific price or return data: .px_data, .pct_change, .log_ret
-# Show_hl = True includes the cumulative min/max price for the period
+up_down = cp.Up_Down(px_or_ret,[data_type='price'],[show_hl=False])
+lagged_data = cp.Lagged_Data(px_or_ret,[lag=int],[lag_until=int],[col_to_lag=str],[show_hl=False])
+
+# Show_hl = True includes columns with the cumulative min/max price for the period
 # Moving average type can be simple, exponential, time_series, triangular or variable
 # data_type can be either 'price' or 'return' where needed
 ```
-- Indicators take a data batch (dataframe) and output a dictionary according to currency. 
-- The value associated with each currency key will be a dataframe with the currency raw data plus the indicator
 - A batch with one or multiple currencies can be passed as input
+- For px_or_ret you must pass specific price or return data: .px_data, .pct_change, .log_ret. Otherwise if passed a Batch, the default will be price data
+- Indicators passed only one currency will output a dataframe, with multiple currencies output will be a dictionary
+- The value associated with each currency key will be a dataframe with the currency raw data plus the indicator
+- Multiple indicators can be called one after the other 
+
 

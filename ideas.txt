@@ -12,9 +12,12 @@
 
 - Find ways to reduce bias
 
-- Maybe have batches as classes where you simply append indicators. If a dictionary is passed or dataframe with multiple currencies is passed then add dictionary to all currencies or create a dictionary of multiple currencies. Output either a dataframe or dictionary.
+- Method chaining for indicators
 
-        - You can pass a function (indicator) as a parameter to another that determines whether the input is a dict or dataframe and act accordingly.
+        - Would have to make px an return attributes to methods. create an indicator class that takes a batch, and all indicators as subclasses can be appended.
+        batch > indicator > ATR > MA = batch.log_ret().ATR().MA()
+
+        - Or maybe not with a batch class but a pd.Dataframe class
 
 Random trees:
 
