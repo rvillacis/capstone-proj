@@ -1,7 +1,7 @@
 # Add indicators separately and then also all of them to a dataframe at once, or selecting which ones you want
 import numpy as np
 import pandas as pd
-from extraction import Batch, Random_batch
+from .extraction import Batch, Random_batch
 
 def prepare_data(data):
 
