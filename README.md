@@ -6,6 +6,8 @@ Capstone project for the M.S. in Analytics at the University of Chicago. The goa
 ```python
 import capstone_proj as cp
 ```
+### Dependencies
+numpy, pandas, tti, pyfolio
 
 ### Data Extraction for Time Series Tests
 Data extraction methods provide a dataframe with currency data for specified dates. 

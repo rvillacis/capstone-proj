@@ -199,5 +199,6 @@ if __name__ == '__main__':
 
     batch = Batch(start='2003-01-01',days=30,currencies='USDEUR')
     data = batch.px_data
-    print(data)
+    data['hola'] = data.index
+    print(isinstance(data.index,pd.DatetimeIndex))
     
