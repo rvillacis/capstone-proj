@@ -5,7 +5,8 @@
     },
     "portfolio_settings":{
         "return":10,
-        "max_drawdown":20
+        "max_drawdown":20,
+        "cash":1000000
     }
 
 
