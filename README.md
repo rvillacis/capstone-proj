@@ -58,4 +58,42 @@ lagged_data = cp.Lagged_Data(px_or_ret,[lag=int],[lag_until=int],[col_to_lag=str
 - The value associated with each currency key will be a dataframe with the currency raw data plus the indicator
 - Multiple indicators can be called one after the other 
 
+### Portfolio Creation and Trading
+```python
+portfolio = cp.Portfolio(batch, cash=1000000)
+portfolio.purchase_order(symbol='USDEUR',amount=-500000,price=1.0559,date='2003-01-15')
+portfolio.purchase_order(symbol='USDGBP',amount=100000,price=1.6368,date='2003-01-15')
+
+# Output Attributes:
+.cash, .num_orders, .prices, .positions, .transactions, .returns
+
+# Methods
+.purchase_order(symbol,amount,price,date), .calc_returns(), .backtest_data()
+```
+- Create a portfolio object with specific price data and then begin trading for securities/dates in that timeframe
+- Calculate PnL, daily and cumulative returns using portfolio.calc_returns()
+- Extract returns, positions, and transactions data for backtesting using portfolio.backtest_data()
+
+### Backtesting
+Once we have created a portfolio, we can use that data with the pyfolio module to extract/graph summary statistics on return, volatility, and exposure for our strategy.
+```python
+import pyfolio as pf
+returns,positions,transactions = portfolio.backtest_data()
+
+#Summary
+pf.show_perf_stats(returns=returns, positions=positions)
+#Returns
+pf.plot_rolling_returns(returns=returns)
+pf.plot_rolling_sharpe(returns=returns)
+pf.plot_returns(returns=returns)
+pf.plot_monthly_returns_timeseries(returns=returns)
+pf.plot_annual_returns(returns=returns)
+#Volatility
+pf.timeseries.max_drawdown(returns=returns)
+pf.plot_drawdown_underwater(returns=returns)
+pf.plot_rolling_volatility(returns=returns)
+#Exposure
+pf.plot_exposures(returns=returns,positions=positions)
+pf.plot_gross_leverage(returns=returns,positions=positions)
+```
 
