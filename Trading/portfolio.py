@@ -42,15 +42,19 @@ class Portfolio():
 
     def check_cash(self,symbol,amount,price,date):
 
+        # Return False if there isn't enough cash for the trade. Return True if there is money available
+
         if self.positions.loc[date,symbol] == 0:
             if self.positions.loc[date,'cash'] < abs(amount*price):
-                raise ValueError('There is not enough available cash to buy {} {} on {}'.format(amount,symbol,date))
+                return False
         elif self.positions.loc[date,symbol] > 0:
             if (amount*price > self.positions.loc[date,'cash']) or (-amount*price > self.cash):
-                raise ValueError('There is not enough available cash to buy {} {} on {}'.format(amount,symbol,date))
+                return False
         elif self.positions.loc[date,symbol] < 0:
             if (-amount*price > self.positions.loc[date,'cash']) or (amount*price > self.cash):
-                raise ValueError('There is not enough available cash to buy {} {} on {}'.format(amount,symbol,date))
+                return False
+        else:
+            return True
 
     def kelly_criterion(self,current_price,expected_price,currency,date):
         
@@ -62,25 +66,25 @@ class Portfolio():
 
         return position_size_usd
 
-    def execute_pending_orders(self,df_actual,date):
+    def execute_pending_orders(self,date):
     
         for order in target_orders:
             if order['long_short'] == 'long':
-                if df_actual[date,order['currency']] >= order['target']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], df_actual[date,order['currency']], date)
+                if self.prices[date,order['currency']] >= order['target']:
+                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
 
             elif order['long_short'] == 'short':
-                if df_actual[date,order['currency']] <= order['target']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], df_actual[date,order['currency']], date)
+                if self.prices[date,order['currency']] <= order['target']:
+                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
 
         for order in stop_losses:
             if order['long_short'] == 'long':
-                if df_actual[date,order['currency']] <= order['stop']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], df_actual[date,order['currency']], date)
+                if self.prices[date,order['currency']] <= order['stop']:
+                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
 
             elif order['long_short'] == 'short':
-                if df_actual[date,order['currency']] >= order['stop']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], df_actual[date,order['currency']], date)
+                if self.prices[date,order['currency']] >= order['stop']:
+                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
 
     def purchase_order(self,symbol,amount,price,date):
 
@@ -142,11 +146,32 @@ class Portfolio():
 
         self.pending_orders['target_orders'].append(target_order)
 
-    def long_biggest_winner():
-        pass
+    def long_biggest_winner(self,current_date,future_date):
+        percent_next_day = ((self.predictions.loc[future_date] - self.prices.loc[current_date])/self.prices.loc[current_date]).dropna()
 
-    def short_biggest_loser():
-        pass
+        if max(percent_next_day) > 0:
+            currency = percent_next_day.idxmax()
+            current_price = self.prices.loc[current_date,currency]
+            expected_price = self.predictions.loc[future_date,currency]
+
+            return currency, current_price, expected_price
+
+        else:
+            return False
+
+    def short_biggest_loser(self,current_date,future_date):
+
+        percent_next_day = ((self.predictions.loc[future_date] - self.prices.loc[current_date])/self.prices.loc[current_date]).dropna()
+
+        if min(percent_next_day) < 0:
+            currency = percent_next_day.idxmin()
+            current_price = self.prices.loc[current_date,currency]
+            expected_price = self.predictions.loc[future_date,currency]
+            
+            return currency, current_price, expected_price
+
+        else:
+            return False
         
     def calc_returns(self):
 
@@ -170,18 +195,58 @@ class Portfolio():
 
         return returns,positions,transactions
 
+    def backtest_pipeline(self,predictions,probabilities):
+        self.predictions = predictions
+        self.success_probability = probabilities
+        dates = predictions.index.strftime('%Y-%m-%d').tolist()
+
+        for date in range(len(dates)-1):
+
+            current_date = dates[date]
+            future_date = dates[date+1]
+
+            self.execute_pending_orders(current_date)
+
+            long_currency = self.long_biggest_winner(current_date, future_date)
+            short_currency = self.short_biggest_loser(current_date, future_date)
+
+            if long_currency is not False:
+                currency, current_price, expected_price = long_currency
+
+            if short_currency is not False:
+                currency, current_price, expected_price = short_currency
+            
+
+
 
 if __name__ == '__main__':
 
-    batch = Batch(start='2003-01-01',days=30,currencies='USDEUR')
-    batch = Batch(start='2003-01-01',days=30,currencies=['USDEUR','USDGBP'])
-    portfolio = Portfolio(batch.px_data)
-    portfolio.purchase_order('USDEUR',-500000, 1.0559, '2003-01-15')
-    # portfolio.calc_returns()
+    px_data = pd.read_csv("/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/actual_df.csv", index_col='Date',parse_dates=True)
+    predictions = pd.read_csv("/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/predict_df.csv", index_col='Date',parse_dates=True)
+    probabilities = pd.read_csv("/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/correct_direction.csv", index_col='Currency')
 
-    # returns,positions,transactions = portfolio.backtest_data()
+    portfolio = Portfolio(px_data)
+    # portfolio.backtest_pipeline(predictions, probabilities)
+    expected_price = 0.97
+    current_price = 1
+    expected_return = 1 + (abs(expected_price - current_price)/current_price)
 
-    # data = {'price':20}
-    # hola = data['prie'] or 0
+    print(expected_return)
+    
 
-    print(portfolio.positions)
+    
+    # print(dates[0].date())
+
+    
+    # print(((predictions.iloc[1] - portfolio.prices.iloc[0])/portfolio.prices.iloc[0]).dropna().idxmax())
+
+    # portfolio.purchase_order('USDEUR',-500000, 1.0559, '2003-01-15')
+    # # portfolio.calc_returns()
+
+    # # returns,positions,transactions = portfolio.backtest_data()
+
+    # # data = {'price':20}
+    # # hola = data['prie'] or 0
+
+    # print(portfolio.positions)
+    # print(px_data)
