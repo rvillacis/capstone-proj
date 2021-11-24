@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from extraction import Batch, Random_batch
+from .extraction import Batch, Random_batch
 
 class Portfolio():
 
@@ -9,7 +9,7 @@ class Portfolio():
         self.cash = cash
         self.max_portfolio = cash
         self.num_orders = 0
-        self.pending_orders = {'target_orders':[], 'stop_losses':[]}
+        self.pending_orders = []
 
         if (isinstance(prices, pd.DataFrame)) or (isinstance(prices, Batch)):
             if isinstance(prices, Batch):
@@ -43,48 +43,47 @@ class Portfolio():
     def check_cash(self,symbol,amount,price,date):
 
         # Return False if there isn't enough cash for the trade. Return True if there is money available
+        cash_available = True
 
         if self.positions.loc[date,symbol] == 0:
             if self.positions.loc[date,'cash'] < abs(amount*price):
-                return False
+                cash_available = False
         elif self.positions.loc[date,symbol] > 0:
             if (amount*price > self.positions.loc[date,'cash']) or (-amount*price > self.cash):
-                return False
+                cash_available = False
         elif self.positions.loc[date,symbol] < 0:
             if (-amount*price > self.positions.loc[date,'cash']) or (amount*price > self.cash):
-                return False
-        else:
-            return True
+                cash_available = False
+        
+        return cash_available
 
     def kelly_criterion(self,current_price,expected_price,currency,date):
         
         expected_return = 1 + (abs(expected_price - current_price)/current_price)
-        favorable_probability = self.model_success_probability.loc[currency]
+        favorable_probability = float(self.success_probability.loc[currency])
         current_position = abs(current_price * self.positions.loc[date,currency])
 
-        position_size_usd = (expected_return * favorable_probability + favorable_probability - 1) / (expected_return * max(np.log(current_position)/2,1))
+        position_percent = (expected_return * favorable_probability + favorable_probability - 1) / (expected_return * max(np.log(current_position)/2,1))
+        position_usd = position_percent * self.max_portfolio
+        position_units = int(position_usd / current_price)
 
-        return position_size_usd
+        return position_units
 
     def execute_pending_orders(self,date):
-    
-        for order in target_orders:
+
+        for order in self.pending_orders:
+
+            current_price = self.prices.loc[date,order['currency']]
+
             if order['long_short'] == 'long':
-                if self.prices[date,order['currency']] >= order['target']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
+                if (current_price >= order['target']) or (current_price <= order['stop']):
+                    self.purchase_order(order['currency'],-order['amount'], current_price, date)
+                    self.pending_orders.remove(order)
 
             elif order['long_short'] == 'short':
-                if self.prices[date,order['currency']] <= order['target']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
-
-        for order in stop_losses:
-            if order['long_short'] == 'long':
-                if self.prices[date,order['currency']] <= order['stop']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
-
-            elif order['long_short'] == 'short':
-                if self.prices[date,order['currency']] >= order['stop']:
-                    portfolio.purchase_order(order['currency'],-order['amount'], self.prices[date,order['currency']], date)
+                if (current_price <= order['target']) or (current_price >= order['stop']):
+                    self.purchase_order(order['currency'],-order['amount'], current_price, date)
+                    self.pending_orders.remove(order)
 
     def purchase_order(self,symbol,amount,price,date):
 
@@ -120,31 +119,19 @@ class Portfolio():
 
         self.positions.loc[date:,symbol] += amount
 
-    def set_stop_loss(self,currency,units,stop_price):
+    def set_stop_target(self,currency,position_size,stop_price,target_price):
 
-        long_short = 'long' if units >= 0 else 'short'
+        long_short = 'long' if position_size >= 0 else 'short'
 
-        stop_loss = {
+        pending_order = {
             'currency': currency,
             'long_short': long_short,
-            'amount': units,
-            'stop': stop_price
-        }
-
-        self.pending_orders['stop_losses'].append(stop_loss)
-
-    def set_target_order(self,currency,units,target_price):
-        
-        long_short = 'long' if units >= 0 else 'short'
-
-        target_order = {
-            'currency': currency,
-            'long_short': long_short,
-            'amount': units,
+            'amount': position_size,
+            'stop': stop_price,
             'target': target_price
         }
 
-        self.pending_orders['target_orders'].append(target_order)
+        self.pending_orders.append(pending_order)
 
     def long_biggest_winner(self,current_date,future_date):
         percent_next_day = ((self.predictions.loc[future_date] - self.prices.loc[current_date])/self.prices.loc[current_date]).dropna()
@@ -212,41 +199,34 @@ class Portfolio():
 
             if long_currency is not False:
                 currency, current_price, expected_price = long_currency
+                position_size = self.kelly_criterion(current_price, expected_price, currency, current_date)
+
+                if self.check_cash(currency,position_size,current_price,current_date) is not False:
+                    self.purchase_order(currency,position_size,current_price,current_date)
+                    self.set_stop_target(currency,position_size,current_price*0.95,expected_price)
 
             if short_currency is not False:
                 currency, current_price, expected_price = short_currency
-            
+                position_size = self.kelly_criterion(current_price, expected_price, currency, current_date)
 
+                if self.check_cash(currency,position_size,current_price,current_date) is not False:
+                    self.purchase_order(currency,-position_size,current_price,current_date)
+                    self.set_stop_target(currency,-position_size,current_price*1.05,expected_price)
 
+                
 
 if __name__ == '__main__':
 
     px_data = pd.read_csv("/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/actual_df.csv", index_col='Date',parse_dates=True)
     predictions = pd.read_csv("/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/predict_df.csv", index_col='Date',parse_dates=True)
-    probabilities = pd.read_csv("/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/correct_direction.csv", index_col='Currency')
+    probabilities = pd.read_csv("/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/correct_direction.csv", index_col='Currency')  
 
     portfolio = Portfolio(px_data)
-    # portfolio.backtest_pipeline(predictions, probabilities)
-    expected_price = 0.97
-    current_price = 1
-    expected_return = 1 + (abs(expected_price - current_price)/current_price)
+    portfolio.backtest_pipeline(predictions, probabilities)
+    portfolio.positions.to_csv('portfolio_positions7.csv')
+    print('Number of total orders: {}'.format(portfolio.num_orders))
 
-    print(expected_return)
-    
+    print(portfolio.calc_returns())
 
-    
-    # print(dates[0].date())
+    returns,positions,transactions = portfolio.backtest_data()
 
-    
-    # print(((predictions.iloc[1] - portfolio.prices.iloc[0])/portfolio.prices.iloc[0]).dropna().idxmax())
-
-    # portfolio.purchase_order('USDEUR',-500000, 1.0559, '2003-01-15')
-    # # portfolio.calc_returns()
-
-    # # returns,positions,transactions = portfolio.backtest_data()
-
-    # # data = {'price':20}
-    # # hola = data['prie'] or 0
-
-    # print(portfolio.positions)
-    # print(px_data)
