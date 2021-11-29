@@ -1,21 +1,20 @@
 #You pass it a return data dataframe and it returns X_train, Y_train, X_test, and Y_test for your model
 import numpy as np
 import pandas as pd
-import capstone_proj as cp
 
 def only_price(experiment_data,currency,start_train,end_train,start_test,end_test):
 
-    up_down = cp.Up_Down(experiment_data.log_ret,data_type='return')[currency]
-    up_down['Up_Down'] = up_down['Up_Down'].shift(-1)
-    up_down.dropna(inplace=True)
+    experiment_px_data = experiment_data.px_data
+    experiment_px_data['target'] = experiment_px_data[currency].shift(-1)
+    experiment_px_data.dropna(inplace=True)
 
-    train_data = up_down[start_train:end_train]
-    X_train = train_data['close'].to_frame()
-    Y_train = train_data['Up_Down'].to_frame()
-
-    test_data = up_down[start_test:end_test]
-    X_test = test_data['close'].to_frame()
-    Y_test = test_data['Up_Down'].to_frame()
+    train_data = experiment_px_data[start_train:end_train]
+    X_train = train_data[currency].to_frame()
+    Y_train = train_data['target'].to_frame()
+    
+    test_data = experiment_px_data[start_test:end_test]
+    X_test = test_data[currency].to_frame()
+    Y_test = test_data['target'].to_frame()
 
     return X_train,Y_train,X_test,Y_test
 
@@ -155,12 +154,12 @@ def interpreted_indicators_lagged_returns(experiment_data,currency,lag,start_tra
 if __name__ == '__main__':
     # import capstone_proj as cp
     
-    # filepath = "/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/FX_Test_USD-per-FX_Chicago.csv"
-    # experiment_data = cp.Batch(start='2002-01-01',end='2014-12-31',currencies='USDEUR',filepath=filepath)
+    # filepath = "/Users/andresvillacis/Documents/GitHub/capstone_proj/Data/FX_Test_USD-per-FX_Chicago_2021_11_04.csv"
+    # experiment_data = cp.Batch(start='2003-01-01',end='2021-11-04',currencies='USDEUR',filepath=filepath)
 
-    # X_train,Y_train,X_test,Y_test = Model_data.only_price(experiment_data.log_ret, 'return', 'USDEUR', '2003-01-01', '2012-12-31', '2014-01-01', '2014-12-31')
+    # X_train,Y_train,X_test,Y_test = only_price(experiment_data, 'USDEUR', '2003-01-01', '2020-12-31', '2021-01-01', '2021-11-04')
 
-    # print(X_train)
+    # print(X_train.join(Y_train))
 
     pass
 
